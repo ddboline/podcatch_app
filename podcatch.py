@@ -12,6 +12,11 @@ from urllib2 import urlopen
 
 import lxml.etree
 
+OUTPUT_DIRECTORIES = {
+    19: '/home/ddboline/Documents/mp3/The_Current_song_of_the_Day/',
+    23: '/home/ddboline/Documents/podcasts/The_Bugle/',
+    24: '/home/ddboline/Documents/podcasts/Welcome_to_Night_Vale/',}
+
 def add_podcast():
     _con = connect_sqlite()
     podcasts = dump_sqlite_memory(sqlite_con=_con, dumpclass=Podcasts)
@@ -19,6 +24,7 @@ def add_podcast():
 
     for pod in podcasts:
         print pod
+        print OUTPUT_DIRECTORIES[pod.castid]
     #pod = Podcasts(castid=24, castname=u'Welcome to Night Vale', feedurl=u'http://nightvale.libsyn.com/rss', pcenabled=1, lastupdate=0, lastattempt=0, failedattempts=0)
     #_con.execute(pod.sql_insert_string())
 
@@ -27,13 +33,20 @@ def podcatch(args):
     podcasts = dump_sqlite_memory(sqlite_con=_con, dumpclass=Podcasts)
     episodes = dump_sqlite_memory(sqlite_con=_con, dumpclass=Episodes)
 
+    #_con.execute('DELETE FROM episodes WHERE title="1 - Pilot";')
+    #_con.execute('UPDATE episodes SET status="Unknown" WHERE episodeid=1876;')
+
     cur_urls = {}
     epids = []
     for ep in episodes:
         cur_urls[ep.epurl] = ep
+        #try:
+            #print ep
+        #except UnicodeEncodeError:
+            #print ep.__repr__().encode(errors='ignore')
         if ep.episodeid not in epids:
             epids.append(ep.episodeid)
-
+    #exit(0)
     urls_to_download = []
     purls = []
     curtitle = ''
@@ -68,13 +81,32 @@ def podcatch(args):
                 if key == 'type':
                     _pep.enctype = val
 
+        if _pep.epurl:
+            if _pep.epurl not in cur_urls:
+                purls.append(_pep)
+            elif _pep.epurl in cur_urls and \
+                    cur_urls[_pep.epurl].status not in ('Downloaded', 'Skipped'):
+                purls.append(_pep)
+
     for ep in purls:
-        #print ep.sql_insert_string()
-        os.system('wget %s' % ep.epurl)
-        ep.status = u'Downloaded'
-        ep.epfailedattempts = 0
-        _con.execute(ep.sql_insert_string())
-        #exit(0)
+        print ep.sql_insert_string()
+        FNAME = os.path.basename(ep.epurl)
+        #os.system('wget %s' % ep.epurl)
+        
+        with open(FNAME, 'wb') as outfile:
+            urlout = urlopen(ep.epurl)
+            if urlout.getcode() != 200:
+                print('something bad happened %d' % urlout.getcode())
+                exit(0)
+            for line in urlout:
+                outfile.write(line)
+
+        print os.stat(FNAME)
+        if os.stat(FNAME).st_size > 0:
+            os.system('mv %s %s' % (FNAME, OUTPUT_DIRECTORIES[ep.castid]))
+            ep.status = u'Downloaded'
+            ep.epfailedattempts = 0
+            _con.execute(ep.sql_insert_string())
 
     return
 
