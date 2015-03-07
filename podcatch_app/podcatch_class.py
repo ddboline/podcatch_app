@@ -11,17 +11,34 @@ class Podcasts(object):
                    'lastattempt', 'failedattempts']
     
     def __init__(self, **kwargs):
+        self.castname = ''
+        self.feedurl = ''
+        self.pcenabled = 1
         for col in self.__columns__:
             if col in kwargs:
                 setattr(self, col, kwargs[col])
             else:
                 setattr(self, col, 0)
-        self.castname = ''
-        self.feedurl = ''
-        self.pcenabled = 1
         
     def __repr__(self):
         return '<podcasts(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x)) for x in self.__columns__]))
+
+    def sql_insert_string(self):
+        outstr = []
+        outstr.append('INSERT INTO %s(%s)' % (self.__tablename__, ', '.join(self.__columns__)))
+        valstr = []
+        for col in self.__columns__:
+            val = getattr(self, col)
+            if type(val) == unicode:
+                valstr.append("'%s'" % val.replace("'",''))
+            elif type(val) == int:
+                valstr.append('%s' % val)
+            elif not val:
+                valstr.append('NULL')
+            else:
+                valstr.append('%s' % val)
+        outstr.append('VALUES (%s);' % ', '.join(valstr))
+        return ' '.join(outstr)
 
 class Episodes(object):
     __tablename__ = 'episodes'
@@ -53,7 +70,7 @@ class Episodes(object):
         for col in self.__columns__:
             val = getattr(self, col)
             if type(val) == unicode:
-                valstr.append("'%s'" % val)
+                valstr.append("'%s'" % val.replace("'",''))
             elif type(val) == int:
                 valstr.append('%s' % val)
             elif not val:

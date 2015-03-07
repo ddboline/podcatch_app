@@ -12,6 +12,15 @@ from urllib2 import urlopen
 
 import lxml.etree
 
+def add_podcast():
+    _con = connect_sqlite()
+    podcasts = dump_sqlite_memory(sqlite_con=_con, dumpclass=Podcasts)
+    episodes = dump_sqlite_memory(sqlite_con=_con, dumpclass=Episodes)
+
+    for pod in podcasts:
+        print pod
+    #pod = Podcasts(castid=24, castname=u'Welcome to Night Vale', feedurl=u'http://nightvale.libsyn.com/rss', pcenabled=1, lastupdate=0, lastattempt=0, failedattempts=0)
+    #_con.execute(pod.sql_insert_string())
 
 def podcatch(args):
     _con = connect_sqlite()
@@ -59,10 +68,8 @@ def podcatch(args):
                 if key == 'type':
                     _pep.enctype = val
 
-    #_con.execute(u"INSERT INTO episodes(castid, episodeid, title, epurl, enctype, status, eplength, epfirstattempt, eplastattempt, epfailedattempts, epguid) VALUES (19, 1057, 'Twerps - Back to You', 'http://download.publicradio.org/podcast/minnesota/the_current/song_of_the_day/2015/03/03/20150303_twerps_back_to_you_128.mp3', 'audio/mpeg', 'Downloaded', 2434888, 0, 0, 0, NULL);")
-    #exit(0)
-
     for ep in purls:
+        #print ep.sql_insert_string()
         os.system('wget %s' % ep.epurl)
         ep.status = u'Downloaded'
         ep.epfailedattempts = 0
@@ -72,4 +79,5 @@ def podcatch(args):
     return
 
 if __name__ == '__main__':
+    #add_podcast()
     podcatch(os.sys.argv)
