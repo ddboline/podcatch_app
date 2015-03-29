@@ -92,7 +92,7 @@ def podcatch(args):
         print ep.sql_insert_string()
         FNAME = os.path.basename(ep.epurl)
         #os.system('wget %s' % ep.epurl)
-        
+
         with open(FNAME, 'wb') as outfile:
             urlout = urlopen(ep.epurl)
             if urlout.getcode() != 200:

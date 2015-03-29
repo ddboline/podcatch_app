@@ -6,10 +6,10 @@
 
 class Podcasts(object):
     __tablename__ = 'podcasts'
-    
+
     __columns__ = ['castid', 'castname', 'feedurl', 'pcenabled', 'lastupdate',
                    'lastattempt', 'failedattempts']
-    
+
     def __init__(self, **kwargs):
         self.castname = ''
         self.feedurl = ''
@@ -19,7 +19,7 @@ class Podcasts(object):
                 setattr(self, col, kwargs[col])
             else:
                 setattr(self, col, 0)
-        
+
     def __repr__(self):
         return '<podcasts(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x)) for x in self.__columns__]))
 
@@ -46,7 +46,7 @@ class Episodes(object):
     __columns__ = ['castid', 'episodeid', 'title', 'epurl', 'enctype',
                    'status', 'eplength', 'epfirstattempt', 'eplastattempt',
                    'epfailedattempts', 'epguid']
-    
+
     def __init__(self, **kwargs):
         for col in self.__columns__:
             if col in kwargs:
