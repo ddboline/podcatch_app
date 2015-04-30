@@ -3,6 +3,10 @@
 '''
     Class representing podcasts, episodes tables in sqlite db
 '''
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 class Podcasts(object):
     __tablename__ = 'podcasts'
@@ -69,7 +73,7 @@ class Episodes(object):
         valstr = []
         for col in self.__columns__:
             val = getattr(self, col)
-            if type(val) == unicode:
+            if type(val) == unicode or type(val) == str:
                 valstr.append("'%s'" % val.replace("'",''))
             elif type(val) == int:
                 valstr.append('%s' % val)
