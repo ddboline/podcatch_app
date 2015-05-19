@@ -79,7 +79,10 @@ def podcatch(args):
                 if key == 'url':
                     _pep.epurl = val
                 if key == 'length':
-                    _pep.eplength = int(val)
+                    if not val:
+                        _pep.eplength = -1
+                    else:
+                        _pep.eplength = int(val)
                 if key == 'type':
                     _pep.enctype = val
 
@@ -92,23 +95,26 @@ def podcatch(args):
 
     for ep in purls:
         print(ep.sql_insert_string())
-        FNAME = os.path.basename(ep.epurl)
+        fname = os.path.basename(ep.epurl)
 
-        with open(FNAME, 'wb') as outfile:
+        with open(fname, 'wb') as outfile:
             urlout = openurl(ep.epurl)
             if urlout.getcode() != 200:
                 print('something bad happened %d' % urlout.getcode())
                 exit(0)
             for line in urlout:
                 outfile.write(line)
-        ep.epguid = get_md5(FNAME)
-        print(os.stat(FNAME))
-        if os.stat(FNAME).st_size > 0:
-            os.system('mv %s %s' % (FNAME, OUTPUT_DIRECTORIES[ep.castid]))
+        ep.epguid = get_md5(fname)
+        print(os.stat(fname))
+        if os.stat(fname).st_size > 0:
+            os.system('mv %s %s' % (fname, OUTPUT_DIRECTORIES[ep.castid]))
             ep.status = u'Downloaded'
             ep.epfailedattempts = 0
             from sqlalchemy.exc import IntegrityError
             _con.execute(ep.sql_insert_string())
+        else:
+            print('bad file')
+            os.remove(fname)
     return
 
 if __name__ == '__main__':
