@@ -28,18 +28,24 @@ def get_md5(fname):
     return output
 
 def openurl(url_):
-    try:
-        from ssl import SSLContext, PROTOCOL_TLSv1
-    except ImportError:
-        SSLContext = None
-        PROTOCOL_TLSv1 = None
-    from urllib2 import urlopen
-    
-    if SSLContext is None:
-        return urlopen(url_)
-    else:
-        gcontext = SSLContext(PROTOCOL_TLSv1)
-        return urlopen(url_, context=gcontext)
+    """ wrapper around requests.get.text simulating urlopen """
+    import requests
+    from requests import HTTPError
+    requests.packages.urllib3.disable_warnings()
+
+    urlout = requests.get(url_)
+    if urlout.status_code != 200:
+        print('something bad happened %d' % urlout.status_code)
+        raise HTTPError
+    return urlout.text.split('\n')
+
+def dump_to_file(url_, outfile_):
+    from contextlib import closing
+    import requests
+    requests.packages.urllib3.disable_warnings()
+    with closing(requests.get(url_, stream=True)) as url_:
+        for chunk in url_.iter_content(4096):
+                    outfile_.write(chunk)
 
 def cleanup_path(orig_path):
     ''' cleanup path string using escape character '''

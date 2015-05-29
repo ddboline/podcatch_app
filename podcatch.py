@@ -13,7 +13,7 @@ import os
 from podcatch_app.podcatch_class import Podcasts, Episodes
 from podcatch_app.sqlite_dump import connect_sqlite, dump_sqlite_memory
 
-from podcatch_app.util import openurl, get_md5
+from podcatch_app.util import dump_to_file, get_md5
 
 import lxml.etree
 
@@ -57,9 +57,8 @@ def podcatch(args):
     purls = []
     newepid = sorted(set(epids))[-1]
     for p in podcasts:
-        _url = openurl(p.feedurl)
         _pep = Episodes()
-        for line in lxml.etree.parse(_url).iter():
+        for line in lxml.etree.parse(p.feedurl).iter():
             if line.tag == 'title':
                 if _pep.epurl:
                     if _pep.epurl not in cur_urls:
@@ -98,12 +97,7 @@ def podcatch(args):
         fname = os.path.basename(ep.epurl)
 
         with open(fname, 'wb') as outfile:
-            urlout = openurl(ep.epurl)
-            if urlout.getcode() != 200:
-                print('something bad happened %d' % urlout.getcode())
-                exit(0)
-            for line in urlout:
-                outfile.write(line)
+            dump_to_file(ep.epurl, outfile)
         ep.epguid = get_md5(fname)
         print(os.stat(fname))
         if os.stat(fname).st_size > 0:
