@@ -11,7 +11,8 @@ from __future__ import unicode_literals
 import os
 
 from podcatch_app.podcatch_class import Podcasts, Episodes
-from podcatch_app.sqlite_dump import connect_sqlite, dump_sqlite_memory
+from podcatch_app.sqlite_dump import (connect_sqlite, dump_sqlite_memory,
+                                      save_sqlite)
 
 from podcatch_app.util import dump_to_file, get_md5
 
@@ -42,7 +43,7 @@ def add_podcast(cid=-1, cname='', furl=''):
     pod = Podcasts(castid=24, castname=u'Welcome to Night Vale',
                    feedurl=u'http://nightvale.libsyn.com/rss',
                    pcenabled=1, lastupdate=0, lastattempt=0, failedattempts=0)
-    _con.execute(pod.sql_insert_string())
+    _con.execute(save_sqlite(pod))
 
 def podcatch(args):
     _con = connect_sqlite()
@@ -93,7 +94,7 @@ def podcatch(args):
                 purls.append(_pep)
 
     for ep in purls:
-        print(ep.sql_insert_string())
+        print(save_sqlite(ep))
         fname = os.path.basename(ep.epurl)
 
         with open(fname, 'wb') as outfile:
@@ -104,8 +105,7 @@ def podcatch(args):
             os.system('mv %s %s' % (fname, OUTPUT_DIRECTORIES[ep.castid]))
             ep.status = u'Downloaded'
             ep.epfailedattempts = 0
-            from sqlalchemy.exc import IntegrityError
-            _con.execute(ep.sql_insert_string())
+            _con.execute(save_sqlite(ep))
         else:
             print('bad file')
             os.remove(fname)

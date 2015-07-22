@@ -9,50 +9,35 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 class Podcasts(object):
-    __tablename__ = 'podcasts'
+    tablename = 'podcasts'
 
-    __columns__ = ['castid', 'castname', 'feedurl', 'pcenabled', 'lastupdate',
+    columns = ['castid', 'castname', 'feedurl', 'pcenabled', 'lastupdate',
                    'lastattempt', 'failedattempts']
 
     def __init__(self, **kwargs):
         self.castname = ''
         self.feedurl = ''
         self.pcenabled = 1
-        for col in self.__columns__:
+        for col in self.columns:
             if col in kwargs:
                 setattr(self, col, kwargs[col])
             else:
                 setattr(self, col, 0)
 
     def __repr__(self):
-        return '<podcasts(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x)) for x in self.__columns__]))
+        return '<podcasts(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x))
+                                   for x in self.columns]))
 
-    def sql_insert_string(self):
-        outstr = []
-        outstr.append('INSERT INTO %s(%s)' % (self.__tablename__, ', '.join(self.__columns__)))
-        valstr = []
-        for col in self.__columns__:
-            val = getattr(self, col)
-            if type(val) == unicode:
-                valstr.append("'%s'" % val.replace("'",''))
-            elif type(val) == int:
-                valstr.append('%s' % val)
-            elif not val:
-                valstr.append('NULL')
-            else:
-                valstr.append('%s' % val)
-        outstr.append('VALUES (%s);' % ', '.join(valstr))
-        return ' '.join(outstr)
 
 class Episodes(object):
-    __tablename__ = 'episodes'
+    tablename = 'episodes'
 
-    __columns__ = ['castid', 'episodeid', 'title', 'epurl', 'enctype',
+    columns = ['castid', 'episodeid', 'title', 'epurl', 'enctype',
                    'status', 'eplength', 'epfirstattempt', 'eplastattempt',
                    'epfailedattempts', 'epguid']
 
     def __init__(self, **kwargs):
-        for col in self.__columns__:
+        for col in self.columns:
             if col in kwargs:
                 setattr(self, col, kwargs[col])
             else:
@@ -65,21 +50,6 @@ class Episodes(object):
         self.epguid = ''
 
     def __repr__(self):
-        return '<episodes(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x)) for x in self.__columns__]))
+        return '<episodes(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x))
+                                   for x in self.columns]))
 
-    def sql_insert_string(self):
-        outstr = []
-        outstr.append('INSERT INTO %s(%s)' % (self.__tablename__, ', '.join(self.__columns__)))
-        valstr = []
-        for col in self.__columns__:
-            val = getattr(self, col)
-            if type(val) == unicode or type(val) == str:
-                valstr.append("'%s'" % val.replace("'",''))
-            elif type(val) == int:
-                valstr.append('%s' % val)
-            elif not val:
-                valstr.append('NULL')
-            else:
-                valstr.append('%s' % val)
-        outstr.append('VALUES (%s);' % ', '.join(valstr))
-        return ' '.join(outstr)
