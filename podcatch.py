@@ -65,7 +65,8 @@ def podcatch(args):
                     if _pep.epurl not in cur_urls:
                         purls.append(_pep)
                     elif _pep.epurl in cur_urls and \
-                         cur_urls[_pep.epurl].status not in ('Downloaded', 'Skipped'):
+                         cur_urls[_pep.epurl].status not in ('Downloaded',
+                                                             'Skipped'):
                         purls.append(_pep)
                 _pep = Episodes()
                 _pep.title = unicode(line.text)
@@ -90,7 +91,8 @@ def podcatch(args):
             if _pep.epurl not in cur_urls:
                 purls.append(_pep)
             elif _pep.epurl in cur_urls and \
-                    cur_urls[_pep.epurl].status not in ('Downloaded', 'Skipped'):
+                    cur_urls[_pep.epurl].status not in ('Downloaded',
+                                                        'Skipped'):
                 purls.append(_pep)
 
     for ep in purls:
