@@ -49,9 +49,28 @@ def dump_to_file(url_, outfile_):
     return True
 
 def cleanup_path(orig_path):
-    ''' cleanup path string using escape character '''
-    return orig_path.replace(' ', '\ ').replace('(', '\(').replace(')', '\)')\
-                    .replace('\'', '\\\'').replace('[', '\[')\
-                    .replace(']', '\]').replace('"', '\"').replace("'", "\'")\
-                    .replace('&', '\&').replace(',', '\,').replace('!', '\!')\
-                    .replace(';', '\;').replace('$', '\$')
+    """ cleanup path string using escape character """
+    chars_to_escape = ' ()"[]&,!;$' + "'"
+    for ch_ in chars_to_escape:
+        orig_path = orig_path.replace(ch_, r'\%c' % ch_)
+    return orig_path
+
+def test_run_command():
+    cmd = 'echo "HELLO"'
+    out = run_command(cmd, do_popen=True).read().strip()
+    print(out, cmd)
+    assert out == b'HELLO'
+
+def test_cleanup_path():
+    INSTR = '/home/ddboline/THIS TEST PATH (OR SOMETHING LIKE IT) [OR OTHER!] & ELSE $;,""'
+    OUTSTR = r'/home/ddboline/THIS\ TEST\ PATH\ \(OR\ SOMETHING\ LIKE\ IT\)\ \[OR\ OTHER\!\]\ \&\ ELSE\ \$\;\,\"\"'
+    print(cleanup_path(INSTR))
+    assert cleanup_path(INSTR) == OUTSTR
+
+def test_get_md5():
+    import tempfile
+    with tempfile.NamedTemporaryFile() as tfi:
+        tfi.write(b'HELLO\n')
+        tfi.flush()
+        out = get_md5(tfi.name)
+        assert out == b'0084467710d2fc9d8a306e14efbe6d0f'
