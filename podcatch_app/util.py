@@ -10,21 +10,52 @@ from subprocess import call, Popen, PIPE
 
 HOMEDIR = os.getenv('HOME')
 
-def run_command(command, do_popen=False, turn_on_commands=True):
-    ''' wrapper around os.system '''
+class PopenWrapperClass(object):
+    """ context wrapper around subprocess.Popen """
+    def __init__(self, command):
+        """ init fn """
+        self.command = command
+        self.pop_ = Popen(self.command, shell=True, stdout=PIPE)
+
+    def __iter__(self):
+        return self.pop_.stdout
+
+    def __enter__(self):
+        """ enter fn """
+        return self.pop_.stdout
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """ exit fn """
+        if hasattr(self.pop_, '__exit__'):
+            efunc = getattr(self.pop_, '__exit__')
+            return efunc(exc_type, exc_value, traceback)
+        else:
+            self.pop_.wait()
+            if exc_type or exc_value or traceback:
+                return False
+            else:
+                return True
+
+def run_command(command, do_popen=False, turn_on_commands=True,
+                single_line=False):
+    """ wrapper around os.system """
     if not turn_on_commands:
         print(command)
         return command
     elif do_popen:
-        return Popen(command, shell=True, stdout=PIPE, close_fds=True).stdout
+        if single_line:
+            with PopenWrapperClass(command) as pop_:
+                return pop_.read()
+        else:
+            return PopenWrapperClass(command)
     else:
         return call(command, shell=True)
 
 def get_md5(fname):
     if not os.path.exists(fname):
         return None
-    output = run_command('md5sum "%s"' % fname,
-                         do_popen=True).read().split()[0]
+    output = run_command('md5sum "%s"' % fname, do_popen=True,
+                         single_line=True).split()[0]
     return output
 
 def openurl(url_):
@@ -57,7 +88,7 @@ def cleanup_path(orig_path):
 
 def test_run_command():
     cmd = 'echo "HELLO"'
-    out = run_command(cmd, do_popen=True).read().strip()
+    out = run_command(cmd, do_popen=True, single_line=True).strip()
     print(out, cmd)
     assert out == b'HELLO'
 
