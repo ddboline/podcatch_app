@@ -9,8 +9,8 @@ from __future__ import unicode_literals
 
 from sqlalchemy import create_engine
 
-def connect_sqlite():
-    engine = create_engine('sqlite:///podcatch.db', echo=False)
+def connect_sqlite(dbfile='podcatch.db'):
+    engine = create_engine('sqlite:///%s' % dbfile, echo=False)
     con = engine.connect()
     return con
 
