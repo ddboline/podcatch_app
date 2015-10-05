@@ -9,10 +9,12 @@ from __future__ import unicode_literals
 
 from sqlalchemy import create_engine
 
+
 def connect_sqlite(dbfile='podcatch.db'):
     engine = create_engine('sqlite:///%s' % dbfile, echo=False)
     con = engine.connect()
     return con
+
 
 def dump_sqlite_memory(sqlite_con=None, dumpclass=None):
     dbcon = sqlite_con
@@ -31,6 +33,7 @@ def dump_sqlite_memory(sqlite_con=None, dumpclass=None):
         outlist.append(classinst)
     return outlist
 
+
 def save_sqlite(dumpclass=None):
     outstr = []
     outstr.append('INSERT INTO %s(%s)' % (dumpclass.tablename,
@@ -39,7 +42,7 @@ def save_sqlite(dumpclass=None):
     for col in dumpclass.columns:
         val = getattr(dumpclass, col)
         if type(val) == unicode or type(val) == str:
-            valstr.append("'%s'" % val.replace("'",''))
+            valstr.append("'%s'" % val.replace("'", ''))
         elif type(val) == int:
             valstr.append('%s' % val)
         elif not val:

@@ -21,7 +21,8 @@ import lxml.etree
 OUTPUT_DIRECTORIES = {
     19: '/home/ddboline/Documents/mp3/The_Current_song_of_the_Day/',
     23: '/home/ddboline/Documents/podcasts/The_Bugle/',
-    24: '/home/ddboline/Documents/podcasts/Welcome_to_Night_Vale/',}
+    24: '/home/ddboline/Documents/podcasts/Welcome_to_Night_Vale/'}
+
 
 def add_podcast(cid=-1, cname='', furl=''):
     if cid == -1 and not cname and not furl:
@@ -45,6 +46,7 @@ def add_podcast(cid=-1, cname='', furl=''):
                    pcenabled=1, lastupdate=0, lastattempt=0, failedattempts=0)
     _con.execute(save_sqlite(pod))
 
+
 def podcatch(args):
     _con = connect_sqlite()
     podcasts = dump_sqlite_memory(sqlite_con=_con, dumpclass=Podcasts)
@@ -65,8 +67,8 @@ def podcatch(args):
                     if _pep.epurl not in cur_urls:
                         purls.append(_pep)
                     elif _pep.epurl in cur_urls and \
-                         cur_urls[_pep.epurl].status not in ('Downloaded',
-                                                             'Skipped'):
+                            cur_urls[_pep.epurl].status not in ('Downloaded',
+                                                                'Skipped'):
                         purls.append(_pep)
                 _pep = Episodes()
                 _pep.title = unicode(line.text)

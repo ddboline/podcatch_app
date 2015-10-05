@@ -8,11 +8,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+
 class Podcasts(object):
     tablename = 'podcasts'
 
     columns = ['castid', 'castname', 'feedurl', 'pcenabled', 'lastupdate',
-                   'lastattempt', 'failedattempts']
+               'lastattempt', 'failedattempts']
 
     def __init__(self, **kwargs):
         self.castname = ''
@@ -28,6 +29,7 @@ class Podcasts(object):
         return '<podcasts(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x))
                                    for x in self.columns]))
 
+
 def test_podcasts():
     tdict = {'castid': '12345', 'castname': 'test',
              'feedurl': 'https://httpbin.org/html',
@@ -39,12 +41,13 @@ def test_podcasts():
            'lastupdate=None, lastattempt=None, failedattempts=0)>'
     assert tmp == test
 
+
 class Episodes(object):
     tablename = 'episodes'
 
-    columns = ['castid', 'episodeid', 'title', 'epurl', 'enctype',
-                   'status', 'eplength', 'epfirstattempt', 'eplastattempt',
-                   'epfailedattempts', 'epguid']
+    columns = ['castid', 'episodeid', 'title', 'epurl', 'enctype', 'status',
+               'eplength', 'epfirstattempt', 'eplastattempt',
+               'epfailedattempts', 'epguid']
 
     def __init__(self, **kwargs):
         self.epfailedattempts = 0
@@ -62,6 +65,7 @@ class Episodes(object):
     def __repr__(self):
         return '<episodes(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x))
                                    for x in self.columns]))
+
 
 def test_episodes():
     tdict = {'castid': '12345', 'castname': 'test',
