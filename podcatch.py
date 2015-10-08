@@ -11,10 +11,10 @@ from __future__ import unicode_literals
 import os
 
 from podcatch_app.podcatch_class import Podcasts, Episodes
-from podcatch_app.sqlite_dump import (connect_sqlite, dump_sqlite_memory,
-                                      save_sqlite)
+from podcatch_app.postgres_dump import (connect_postgres, dump_postgres_memory,
+                                        save_postgres)
 
-from podcatch_app.util import dump_to_file, get_md5
+from podcatch_app.util import dump_to_file, get_md5, OpenPostgreSQLsshTunnel
 
 import lxml.etree
 
@@ -24,12 +24,12 @@ OUTPUT_DIRECTORIES = {
     24: '/home/ddboline/Documents/podcasts/Welcome_to_Night_Vale/'}
 
 
-def add_podcast(cid=-1, cname='', furl=''):
+def add_podcast(cid=-1, cname='', furl='', port=5432):
     if cid == -1 and not cname and not furl:
         return
-    _con = connect_sqlite()
-    podcasts = dump_sqlite_memory(sqlite_con=_con, dumpclass=Podcasts)
-    episodes = dump_sqlite_memory(sqlite_con=_con, dumpclass=Episodes)
+    _con = connect_postgres(port=port)
+    podcasts = dump_postgres_memory(dbcon=_con, dumpclass=Podcasts)
+    episodes = dump_postgres_memory(dbcon=_con, dumpclass=Episodes)
 
     for pod in podcasts:
         print(pod)
@@ -44,13 +44,13 @@ def add_podcast(cid=-1, cname='', furl=''):
     pod = Podcasts(castid=24, castname=u'Welcome to Night Vale',
                    feedurl=u'http://nightvale.libsyn.com/rss',
                    pcenabled=1, lastupdate=0, lastattempt=0, failedattempts=0)
-    _con.execute(save_sqlite(pod))
+    _con.execute(save_postgres(pod))
 
 
-def podcatch(args):
-    _con = connect_sqlite()
-    podcasts = dump_sqlite_memory(sqlite_con=_con, dumpclass=Podcasts)
-    episodes = dump_sqlite_memory(sqlite_con=_con, dumpclass=Episodes)
+def podcatch(args, port=5432):
+    _con = connect_postgres(port=port)
+    podcasts = dump_postgres_memory(dbcon=_con, dumpclass=Podcasts)
+    episodes = dump_postgres_memory(dbcon=_con, dumpclass=Episodes)
 
     cur_urls = {}
     epids = []
@@ -98,7 +98,7 @@ def podcatch(args):
                 purls.append(_pep)
 
     for ep in purls:
-        print(save_sqlite(ep))
+        print(save_postgres(ep))
         fname = os.path.basename(ep.epurl)
 
         with open(fname, 'wb') as outfile:
@@ -109,11 +109,12 @@ def podcatch(args):
             os.system('mv %s %s' % (fname, OUTPUT_DIRECTORIES[ep.castid]))
             ep.status = u'Downloaded'
             ep.epfailedattempts = 0
-            _con.execute(save_sqlite(ep))
+            _con.execute(save_postgres(ep))
         else:
             print('bad file')
             os.remove(fname)
     return
 
 if __name__ == '__main__':
-    podcatch(os.sys.argv)
+    with OpenPostgreSQLsshTunnel() as pport:
+        podcatch(os.sys.argv, port=pport)

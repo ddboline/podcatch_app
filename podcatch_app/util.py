@@ -6,9 +6,13 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+import shlex
+import time
 from subprocess import call, Popen, PIPE
 
+HOSTNAME = os.uname()[1]
 HOMEDIR = os.getenv('HOME')
+POSTGRESTRING = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost'
 
 
 class PopenWrapperClass(object):
@@ -121,3 +125,28 @@ def test_get_md5():
         tfi.flush()
         out = get_md5(tfi.name)
         assert out == b'0084467710d2fc9d8a306e14efbe6d0f'
+
+
+class OpenPostgreSQLsshTunnel(object):
+    """ Class to let us open an ssh tunnel, then close it when done """
+    def __init__(self):
+        self.tunnel_process = None
+        self.postgre_port = 5432
+
+    def __enter__(self):
+        if HOSTNAME != 'dilepton-tower':
+            self.postgre_port = 5435
+            _cmd = 'ssh -N -L localhost:%d' % self.postgre_port + \
+                   ':localhost:5432 ddboline@ddbolineathome.mooo.com'
+            args = shlex.split(_cmd)
+            self.tunnel_process = Popen(args, shell=False)
+            time.sleep(5)
+        return self.postgre_port
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.tunnel_process:
+            self.tunnel_process.kill()
+        if exc_type or exc_value or traceback:
+            return False
+        else:
+            return True

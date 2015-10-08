@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 '''
-    Class representing podcasts, episodes tables in sqlite db
+    Class representing podcasts, episodes tables in postgres db
 '''
 from __future__ import absolute_import
 from __future__ import division
