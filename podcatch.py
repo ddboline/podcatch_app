@@ -116,5 +116,5 @@ def podcatch(args, port=5432):
     return
 
 if __name__ == '__main__':
-    with OpenPostgreSQLsshTunnel() as pport:
+    with OpenPostgreSQLsshTunnel(port=5433) as pport:
         podcatch(os.sys.argv, port=pport)
