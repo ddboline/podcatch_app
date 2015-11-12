@@ -47,56 +47,55 @@ def add_podcast(cid=-1, cname='', furl='', port=5432):
     _con.execute(save_postgres(pod))
 
 
+def parse_feed(feed_it, cur_urls, newepid, pod_):
+    _pep = Episodes()
+    for line in feed_it:
+        if line.tag == 'title':
+            if _pep.epurl:
+                if _pep.epurl not in cur_urls:
+                    yield _pep
+                elif _pep.epurl in cur_urls and \
+                        cur_urls[_pep.epurl].status not in ('Downloaded',
+                                                            'Skipped'):
+                    yield _pep
+            _pep = Episodes()
+            _pep.title = unicode(line.text)
+            _pep.castid = pod_.castid
+            _pep.episodeid = newepid
+            newepid += 1
+        for key, val in line.items():
+            val = unicode(val)
+            if not _pep:
+                continue
+            if key == 'url':
+                _pep.epurl = val
+            if key == 'length':
+                if not val:
+                    _pep.eplength = -1
+                else:
+                    _pep.eplength = int(val)
+            if key == 'type':
+                _pep.enctype = val
+
+    if _pep.epurl and (
+            (_pep.epurl not in cur_urls) or
+            (_pep.epurl in cur_urls and cur_urls[_pep.epurl].status not in
+             ('Downloaded', 'Skipped'))):
+        yield _pep
+
+
 def podcatch(args, port=5432):
     _con = connect_postgres(port=port)
     podcasts = dump_postgres_memory(dbcon=_con, dumpclass=Podcasts)
     episodes = dump_postgres_memory(dbcon=_con, dumpclass=Episodes)
 
-    cur_urls = {}
-    epids = []
-    for ep in episodes:
-        cur_urls[ep.epurl] = ep
-        epids.append(ep.episodeid)
+    cur_urls = {ep.epurl: ep for ep in episodes}
+    epids = [ep.episodeid for ep in episodes]
     purls = []
-    newepid = sorted(set(epids))[-1]
+    newepid = max(epids)
     for p in podcasts:
-        _pep = Episodes()
-        for line in lxml.etree.parse(p.feedurl).iter():
-            if line.tag == 'title':
-                if _pep.epurl:
-                    if _pep.epurl not in cur_urls:
-                        purls.append(_pep)
-                    elif _pep.epurl in cur_urls and \
-                            cur_urls[_pep.epurl].status not in ('Downloaded',
-                                                                'Skipped'):
-                        purls.append(_pep)
-                _pep = Episodes()
-                _pep.title = unicode(line.text)
-                _pep.castid = p.castid
-                _pep.episodeid = newepid
-                newepid += 1
-            for key, val in line.items():
-                val = unicode(val)
-                if not _pep:
-                    continue
-                if key == 'url':
-                    _pep.epurl = val
-                if key == 'length':
-                    if not val:
-                        _pep.eplength = -1
-                    else:
-                        _pep.eplength = int(val)
-                if key == 'type':
-                    _pep.enctype = val
-
-        if _pep.epurl:
-            if _pep.epurl not in cur_urls:
-                purls.append(_pep)
-            elif _pep.epurl in cur_urls and \
-                    cur_urls[_pep.epurl].status not in ('Downloaded',
-                                                        'Skipped'):
-                purls.append(_pep)
-
+        purls.extend(list(parse_feed(lxml.etree.parse(p.feedurl).iter(),
+                                     cur_urls, newepid, p)))
     for ep in purls:
         print(save_postgres(ep))
         fname = os.path.basename(ep.epurl)
