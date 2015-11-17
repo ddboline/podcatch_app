@@ -44,7 +44,8 @@ def add_podcast(cid=-1, cname='', furl='', port=5432):
     pod = Podcasts(castid=24, castname=u'Welcome to Night Vale',
                    feedurl=u'http://nightvale.libsyn.com/rss',
                    pcenabled=1, lastupdate=0, lastattempt=0, failedattempts=0)
-    _con.execute(save_postgres(pod))
+    with _con.begin():
+        _con.execute(save_postgres(pod))
 
 
 def parse_feed(feed_it, cur_urls, newepid, pod_):
@@ -108,7 +109,8 @@ def podcatch(args, port=5432):
             os.system('mv %s %s' % (fname, OUTPUT_DIRECTORIES[ep.castid]))
             ep.status = u'Downloaded'
             ep.epfailedattempts = 0
-            _con.execute(save_postgres(ep))
+            with _con.begin():
+                _con.execute(save_postgres(ep))
         else:
             print('bad file')
             os.remove(fname)
