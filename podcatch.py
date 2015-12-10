@@ -53,11 +53,11 @@ def parse_feed(feed_it, cur_urls, newepid, pod_):
     for line in feed_it:
         if line.tag == 'title':
             if _pep.epurl:
-                if _pep.epurl not in cur_urls:
+                if os.path.basename(_pep.epurl) not in cur_urls:
                     yield _pep
-                elif _pep.epurl in cur_urls and \
-                        cur_urls[_pep.epurl].status not in ('Downloaded',
-                                                            'Skipped'):
+                elif os.path.basename(_pep.epurl) in cur_urls and \
+                        cur_urls[os.path.basename(_pep.epurl)].status \
+                        not in ('Downloaded', 'Skipped'):
                     yield _pep
             _pep = Episodes()
             _pep.title = unicode(line.text)
@@ -79,8 +79,9 @@ def parse_feed(feed_it, cur_urls, newepid, pod_):
                 _pep.enctype = val
 
     if _pep.epurl and (
-            (_pep.epurl not in cur_urls) or
-            (_pep.epurl in cur_urls and cur_urls[_pep.epurl].status not in
+            (os.path.basename(_pep.epurl) not in cur_urls) or
+            (os.path.basename(_pep.epurl) in cur_urls and
+             cur_urls[os.path.basename(_pep.epurl)].status not in
              ('Downloaded', 'Skipped'))):
         yield _pep
 
@@ -90,7 +91,9 @@ def podcatch(args, port=5432):
     podcasts = dump_postgres_memory(dbcon=_con, dumpclass=Podcasts)
     episodes = dump_postgres_memory(dbcon=_con, dumpclass=Episodes)
 
-    cur_urls = {ep.epurl: ep for ep in episodes}
+#    cur_urls = {ep.epurl: ep for ep in episodes}
+    cur_urls = {os.path.basename(ep.epurl): ep for ep in episodes}
+
     epids = [ep.episodeid for ep in episodes]
     purls = []
     newepid = max(epids)
@@ -98,12 +101,14 @@ def podcatch(args, port=5432):
         purls.extend(list(parse_feed(lxml.etree.parse(p.feedurl).iter(),
                                      cur_urls, newepid, p)))
     for ep in purls:
-        print(save_postgres(ep))
         fname = os.path.basename(ep.epurl)
 
         with open(fname, 'wb') as outfile:
             dump_to_file(ep.epurl, outfile)
         ep.epguid = get_md5(fname)
+        if any(ep.epguid == ep_.epguid for ep_ in episodes):
+            continue
+        print(save_postgres(ep))
         print(os.stat(fname))
         if os.stat(fname).st_size > 0:
             os.system('mv %s %s' % (fname, OUTPUT_DIRECTORIES[ep.castid]))
