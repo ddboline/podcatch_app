@@ -9,6 +9,8 @@ import os
 import shlex
 import time
 from subprocess import call, Popen, PIPE
+import requests
+from requests import HTTPError
 
 HOSTNAME = os.uname()[1]
 HOMEDIR = os.getenv('HOME')
@@ -69,8 +71,6 @@ def get_md5(fname):
 
 def openurl(url_):
     """ wrapper around requests.get.text simulating urlopen """
-    import requests
-    from requests import HTTPError
     requests.packages.urllib3.disable_warnings()
 
     urlout = requests.get(url_)
@@ -83,7 +83,6 @@ def openurl(url_):
 def dump_to_file(url_, outfile_):
     """ dump url to file """
     from contextlib import closing
-    import requests
     requests.packages.urllib3.disable_warnings()
     with closing(requests.get(url_, stream=True)) as url_:
         for chunk in url_.iter_content(4096):
