@@ -80,13 +80,13 @@ def openurl(url_):
     return urlout.text.split('\n')
 
 
-def dump_to_file(url_, outfile_):
+def dump_to_file(url, outfile):
     """ dump url to file """
     from contextlib import closing
     requests.packages.urllib3.disable_warnings()
-    with closing(requests.get(url_, stream=True)) as url_:
-        for chunk in url_.iter_content(4096):
-            outfile_.write(chunk)
+    with closing(requests.get(url, stream=True)) as url_:
+        for chunk in url_.iter_content():
+            outfile.write(chunk)
     return True
 
 

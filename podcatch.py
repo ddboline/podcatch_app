@@ -101,7 +101,7 @@ def podcatch(args, port=5432):
         purls.extend(list(parse_feed(lxml.etree.parse(p.feedurl).iter(),
                                      cur_urls, newepid, p)))
     for ep in purls:
-        fname = os.path.basename(ep.epurl)
+        fname = os.path.basename(ep.epurl).split('?')[0]
 
         with open(fname, 'wb') as outfile:
             dump_to_file(ep.epurl, outfile)
