@@ -85,8 +85,12 @@ def dump_to_file(url, outfile):
     from contextlib import closing
     requests.packages.urllib3.disable_warnings()
     with closing(requests.get(url, stream=True)) as url_:
-        for chunk in url_.iter_content():
+        last_chunk = None
+        for chunk in url_.iter_content(4096):
+            if chunk == last_chunk:
+                break
             outfile.write(chunk)
+            last_chunk = chunk
     return True
 
 

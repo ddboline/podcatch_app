@@ -3,11 +3,9 @@
 '''
     Class representing podcasts, episodes tables in postgres db
 '''
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+import os
 
 class Podcasts(object):
     tablename = 'podcasts'
@@ -61,6 +59,9 @@ class Episodes(object):
                 setattr(self, col, kwargs[col])
             else:
                 setattr(self, col, 0)
+
+    def epfname(self):
+        return os.path.basename(self.epurl).split('?')[0]
 
     def __repr__(self):
         return '<episodes(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x))

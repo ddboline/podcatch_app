@@ -53,10 +53,10 @@ def parse_feed(feed_it, cur_urls, newepid, pod_):
     for line in feed_it:
         if line.tag == 'title':
             if _pep.epurl:
-                if os.path.basename(_pep.epurl) not in cur_urls:
+                if _pep.epfname() not in cur_urls:
                     yield _pep
-                elif os.path.basename(_pep.epurl) in cur_urls and \
-                        cur_urls[os.path.basename(_pep.epurl)].status \
+                elif _pep.epfname() in cur_urls and \
+                        cur_urls[_pep.epfname()].status \
                         not in ('Downloaded', 'Skipped'):
                     yield _pep
             _pep = Episodes()
@@ -79,9 +79,9 @@ def parse_feed(feed_it, cur_urls, newepid, pod_):
                 _pep.enctype = val
 
     if _pep.epurl and (
-            (os.path.basename(_pep.epurl) not in cur_urls) or
-            (os.path.basename(_pep.epurl) in cur_urls and
-             cur_urls[os.path.basename(_pep.epurl)].status not in
+            (_pep.epfname() not in cur_urls) or
+            (_pep.epfname() in cur_urls and
+             cur_urls[_pep.epfname()].status not in
              ('Downloaded', 'Skipped'))):
         yield _pep
 
@@ -92,7 +92,7 @@ def podcatch(args, port=5432):
     episodes = dump_postgres_memory(dbcon=_con, dumpclass=Episodes)
 
 #    cur_urls = {ep.epurl: ep for ep in episodes}
-    cur_urls = {os.path.basename(ep.epurl): ep for ep in episodes}
+    cur_urls = {ep.epfname(): ep for ep in episodes}
 
     epids = [ep.episodeid for ep in episodes]
     purls = []
@@ -101,7 +101,7 @@ def podcatch(args, port=5432):
         purls.extend(list(parse_feed(lxml.etree.parse(p.feedurl).iter(),
                                      cur_urls, newepid, p)))
     for ep in purls:
-        fname = os.path.basename(ep.epurl).split('?')[0]
+        fname = ep.epfname()
 
         with open(fname, 'wb') as outfile:
             dump_to_file(ep.epurl, outfile)
@@ -111,7 +111,11 @@ def podcatch(args, port=5432):
         print(save_postgres(ep))
         print(os.stat(fname))
         if os.stat(fname).st_size > 0:
-            os.system('mv %s %s' % (fname, OUTPUT_DIRECTORIES[ep.castid]))
+            dest = '%s/%s' % (OUTPUT_DIRECTORIES[ep.castid], fname)
+            if not os.path.exists(dest):
+                os.rename(fname, dest)
+            else:
+                os.remove(fname)
             ep.status = u'Downloaded'
             ep.epfailedattempts = 0
             with _con.begin():
