@@ -9,6 +9,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+import hashlib
 
 from podcatch_app.podcatch_class import Podcasts, Episodes
 from podcatch_app.postgres_dump import (connect_postgres, dump_postgres_memory,
@@ -60,7 +61,7 @@ def parse_feed(feed_it, cur_urls, newepid, pod_):
                         not in ('Downloaded', 'Skipped'):
                     yield _pep
             _pep = Episodes()
-            _pep.title = unicode(line.text)
+            _pep.title = unicode(line.text).encode(errors='replace')
             _pep.castid = pod_.castid
             _pep.episodeid = newepid
             newepid += 1
@@ -101,6 +102,18 @@ def podcatch(args, port=5432):
         purls.extend(list(parse_feed(lxml.etree.parse(p.feedurl).iter(),
                                      cur_urls, newepid, p)))
     for ep in purls:
+#        if ep.title.startswith('Bugle') and ep.title.split()[1].isdigit():
+#            print(ep)
+#            md5 = hashlib.md5()
+#            md5.update(str(ep))
+#            ep.epguid = md5.hexdigest()
+#            ep.status = u'Skipped'
+#            ep.epfailedattempts = 0
+#            print(save_postgres(ep))
+#            with _con.begin():
+#                _con.execute(save_postgres(ep))
+#            continue
+
         fname = ep.epfname()
 
         with open(fname, 'wb') as outfile:
@@ -108,6 +121,7 @@ def podcatch(args, port=5432):
         ep.epguid = get_md5(fname)
         if any(ep.epguid == ep_.epguid for ep_ in episodes):
             continue
+
         print(save_postgres(ep))
         print(os.stat(fname))
         if os.stat(fname).st_size > 0:
