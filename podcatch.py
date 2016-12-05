@@ -10,14 +10,15 @@ from __future__ import unicode_literals
 
 import os
 import hashlib
+import requests
+from StringIO import StringIO
+import lxml.etree
 
 from podcatch_app.podcatch_class import Podcasts, Episodes
 from podcatch_app.postgres_dump import (connect_postgres, dump_postgres_memory,
                                         save_postgres)
 
 from podcatch_app.util import dump_to_file, get_md5, OpenPostgreSQLsshTunnel
-
-import lxml.etree
 
 OUTPUT_DIRECTORIES = {
     19: '/home/ddboline/Documents/mp3/The_Current_song_of_the_Day/',
@@ -99,7 +100,8 @@ def podcatch(args, port=5432):
     purls = []
     newepid = max(epids)
     for p in podcasts:
-        purls.extend(list(parse_feed(lxml.etree.parse(p.feedurl).iter(),
+        resp = requests.get(p.feedurl)
+        purls.extend(list(parse_feed(lxml.etree.parse(StringIO(resp.content)).iter(),
                                      cur_urls, newepid, p)))
     for ep in purls:
 #        if ep.title.startswith('Bugle') and ep.title.split()[1].isdigit():
