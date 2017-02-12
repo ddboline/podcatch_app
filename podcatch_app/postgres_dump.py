@@ -23,8 +23,7 @@ def dump_postgres_memory(dbcon=None, dumpclass=None):
         dbcon = connect_postgres()
 
     outlist = []
-    query = 'SELECT %s from %s;' % (','.join(dumpclass.columns),
-                                    dumpclass.tablename)
+    query = 'SELECT %s from %s;' % (','.join(dumpclass.columns), dumpclass.tablename)
     for line in dbcon.execute(query):
         classinst = dumpclass()
         if len(line) != len(dumpclass.columns):
@@ -37,8 +36,7 @@ def dump_postgres_memory(dbcon=None, dumpclass=None):
 
 def save_postgres(dumpclass=None):
     outstr = []
-    outstr.append('INSERT INTO %s(%s)' % (dumpclass.tablename,
-                                          ', '.join(dumpclass.columns)))
+    outstr.append('INSERT INTO %s(%s)' % (dumpclass.tablename, ', '.join(dumpclass.columns)))
     valstr = []
     for col in dumpclass.columns:
         val = getattr(dumpclass, col)

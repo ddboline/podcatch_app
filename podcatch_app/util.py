@@ -19,6 +19,7 @@ POSTGRESTRING = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost'
 
 class PopenWrapperClass(object):
     """ context wrapper around subprocess.Popen """
+
     def __init__(self, command):
         """ init fn """
         self.command = command
@@ -44,8 +45,7 @@ class PopenWrapperClass(object):
                 return True
 
 
-def run_command(command, do_popen=False, turn_on_commands=True,
-                single_line=False):
+def run_command(command, do_popen=False, turn_on_commands=True, single_line=False):
     """ wrapper around os.system """
     if not turn_on_commands:
         print(command)
@@ -64,8 +64,7 @@ def get_md5(fname):
     """ get md5sum for file """
     if not os.path.exists(fname):
         return None
-    output = run_command('md5sum "%s"' % fname, do_popen=True,
-                         single_line=True).split()[0]
+    output = run_command('md5sum "%s"' % fname, do_popen=True, single_line=True).split()[0]
     return output
 
 
@@ -127,6 +126,7 @@ def test_get_md5():
 
 class OpenPostgreSQLsshTunnel(object):
     """ Class to let us open an ssh tunnel, then close it when done """
+
     def __init__(self, port=5432):
         self.tunnel_process = 0
         self.postgre_port = 5432

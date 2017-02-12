@@ -22,8 +22,7 @@ def dump_sqlite_memory(sqlite_con=None, dumpclass=None):
         dbcon = connect_sqlite()
 
     outlist = []
-    sqlite_query = 'SELECT %s from %s;' % (','.join(dumpclass.columns),
-                                           dumpclass.tablename)
+    sqlite_query = 'SELECT %s from %s;' % (','.join(dumpclass.columns), dumpclass.tablename)
     for line in dbcon.execute(sqlite_query):
         classinst = dumpclass()
         if len(line) != len(dumpclass.columns):
@@ -36,8 +35,7 @@ def dump_sqlite_memory(sqlite_con=None, dumpclass=None):
 
 def save_sqlite(dumpclass=None):
     outstr = []
-    outstr.append('INSERT INTO %s(%s)' % (dumpclass.tablename,
-                                          ', '.join(dumpclass.columns)))
+    outstr.append('INSERT INTO %s(%s)' % (dumpclass.tablename, ', '.join(dumpclass.columns)))
     valstr = []
     for col in dumpclass.columns:
         val = getattr(dumpclass, col)

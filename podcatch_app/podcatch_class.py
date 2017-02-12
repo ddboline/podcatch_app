@@ -3,15 +3,16 @@
 '''
     Class representing podcasts, episodes tables in postgres db
 '''
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 import os
+
 
 class Podcasts(object):
     tablename = 'podcasts'
 
-    columns = ['castid', 'castname', 'feedurl', 'pcenabled', 'lastupdate',
-               'lastattempt', 'failedattempts']
+    columns = [
+        'castid', 'castname', 'feedurl', 'pcenabled', 'lastupdate', 'lastattempt', 'failedattempts'
+    ]
 
     def __init__(self, **kwargs):
         self.castname = ''
@@ -24,15 +25,20 @@ class Podcasts(object):
                 setattr(self, col, 0)
 
     def __repr__(self):
-        return '<podcasts(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x))
-                                   for x in self.columns]))
+        return '<podcasts(%s)>' % (', '.join(
+            ['%s=%s' % (x, getattr(self, x)) for x in self.columns]))
 
 
 def test_podcasts():
-    tdict = {'castid': '12345', 'castname': 'test',
-             'feedurl': 'https://httpbin.org/html',
-             'pcenabled': 'False', 'lastupdate': None,
-             'lastattempt': None, 'failedattempts': 0}
+    tdict = {
+        'castid': '12345',
+        'castname': 'test',
+        'feedurl': 'https://httpbin.org/html',
+        'pcenabled': 'False',
+        'lastupdate': None,
+        'lastattempt': None,
+        'failedattempts': 0
+    }
     tmp = '%s' % Podcasts(**tdict)
     test = '<podcasts(castid=12345, castname=test, ' + \
            'feedurl=https://httpbin.org/html, pcenabled=False, ' + \
@@ -43,9 +49,10 @@ def test_podcasts():
 class Episodes(object):
     tablename = 'episodes'
 
-    columns = ['castid', 'episodeid', 'title', 'epurl', 'enctype', 'status',
-               'eplength', 'epfirstattempt', 'eplastattempt',
-               'epfailedattempts', 'epguid']
+    columns = [
+        'castid', 'episodeid', 'title', 'epurl', 'enctype', 'status', 'eplength', 'epfirstattempt',
+        'eplastattempt', 'epfailedattempts', 'epguid'
+    ]
 
     def __init__(self, **kwargs):
         self.epfailedattempts = 0
@@ -64,19 +71,30 @@ class Episodes(object):
         return os.path.basename(self.epurl).split('?')[0]
 
     def __repr__(self):
-        return '<episodes(%s)>' % (', '.join(['%s=%s' % (x, getattr(self, x))
-                                   for x in self.columns]))
+        return '<episodes(%s)>' % (', '.join(
+            ['%s=%s' % (x, getattr(self, x)) for x in self.columns]))
 
 
 def test_episodes():
-    tdict = {'castid': '12345', 'castname': 'test',
-             'feedurl': 'https://httpbin.org/html',
-             'pcenabled': 'False', 'lastupdate': None,
-             'lastattempt': None, 'failedattempts': 0,
-             'episodeid': 12345, 'title': 'test',
-             'epurl': 'https://httpbin.org/html', 'enctype': 'test',
-             'status': 'bad', 'eplength': 12345, 'epfirstattempt': None,
-             'eplastattempt': None, 'epfailedattempts': 0, 'epguid': 12345}
+    tdict = {
+        'castid': '12345',
+        'castname': 'test',
+        'feedurl': 'https://httpbin.org/html',
+        'pcenabled': 'False',
+        'lastupdate': None,
+        'lastattempt': None,
+        'failedattempts': 0,
+        'episodeid': 12345,
+        'title': 'test',
+        'epurl': 'https://httpbin.org/html',
+        'enctype': 'test',
+        'status': 'bad',
+        'eplength': 12345,
+        'epfirstattempt': None,
+        'eplastattempt': None,
+        'epfailedattempts': 0,
+        'epguid': 12345
+    }
 
     tmp = '%s' % Episodes(**tdict)
     test = '<episodes(castid=12345, episodeid=12345, title=test, ' + \
