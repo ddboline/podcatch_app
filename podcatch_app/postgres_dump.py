@@ -37,16 +37,16 @@ def dump_postgres_memory(dbcon=None, dumpclass=None):
 def save_postgres(dumpclass=None):
     outstr = []
     outstr.append('INSERT INTO %s(%s)' % (dumpclass.tablename, ', '.join(dumpclass.columns)))
-    valstr = []
+    values = []
     for col in dumpclass.columns:
         val = getattr(dumpclass, col)
         if type(val) == unicode or type(val) == str:
-            valstr.append("'%s'" % val.replace("'", ''))
+            values.append(val)
         elif type(val) == int:
-            valstr.append('%s' % val)
+            values.append(val)
         elif not val:
-            valstr.append('NULL')
+            values.append('NULL')
         else:
-            valstr.append('%s' % val)
-    outstr.append('VALUES (%s);' % ', '.join(valstr))
-    return ' '.join(outstr)
+            values.append(val)
+    outstr.append('VALUES ({});'.format(','.join('%s' for _ in dumpclass.columns)))
+    return ' '.join(outstr), values

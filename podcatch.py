@@ -48,7 +48,8 @@ def add_podcast(cid=-1, cname='', furl='', port=5432):
         lastattempt=0,
         failedattempts=0)
     with _con.begin():
-        _con.execute(save_postgres(pod))
+        query, values = save_postgres(pod)
+        _con.execute(query, values)
 
 
 def parse_feed(feed_it, cur_urls, newepid, pod_):
@@ -123,7 +124,8 @@ def podcatch(args, port=5432):
             ep.status = u'Downloaded'
             ep.epfailedattempts = 0
             with _con.begin():
-                _con.execute(save_postgres(ep))
+                query, values = save_postgres(ep)
+                _con.execute(query, values)
         else:
             print('bad file')
             os.remove(fname)
