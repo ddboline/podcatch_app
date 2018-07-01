@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import os
 import requests
-from StringIO import StringIO
+from six import StringIO
 import lxml.etree
 
 from podcatch_app.podcatch_class import Podcasts, Episodes
