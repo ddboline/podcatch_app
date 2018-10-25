@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import os
 import requests
-from six import StringIO
+from six import BytesIO
 import lxml.etree
 
 from podcatch_app.podcatch_class import Podcasts, Episodes
@@ -102,7 +102,7 @@ def podcatch(args, port=5432):
     for p in podcasts:
         resp = requests.get(p.feedurl)
         purls.extend(
-            list(parse_feed(lxml.etree.parse(StringIO(resp.content)).iter(), cur_urls, newepid, p)))
+            list(parse_feed(lxml.etree.parse(BytesIO(resp.content)).iter(), cur_urls, newepid, p)))
     for ep in purls:
 
         fname = ep.epfname()
