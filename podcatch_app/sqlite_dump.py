@@ -39,9 +39,9 @@ def save_sqlite(dumpclass=None):
     valstr = []
     for col in dumpclass.columns:
         val = getattr(dumpclass, col)
-        if type(val) == unicode or type(val) == str:
+        if isinstance(val, text_type):
             valstr.append("'%s'" % val.replace("'", ''))
-        elif type(val) == int:
+        elif isinstance(val, int):
             valstr.append('%s' % val)
         elif not val:
             valstr.append('NULL')

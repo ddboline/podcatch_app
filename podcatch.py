@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import os
 import requests
-from six import BytesIO
+from six import BytesIO, text_type
 import lxml.etree
 
 from podcatch_app.podcatch_class import Podcasts, Episodes
@@ -18,7 +18,8 @@ from podcatch_app.util import dump_to_file, get_md5, OpenPostgreSQLsshTunnel
 OUTPUT_DIRECTORIES = {
     19: '/home/ddboline/Documents/mp3/The_Current_song_of_the_Day/',
     23: '/home/ddboline/Documents/podcasts/The_Bugle/',
-    24: '/home/ddboline/Documents/podcasts/Welcome_to_Night_Vale/'
+    24: '/home/ddboline/Documents/podcasts/Welcome_to_Night_Vale/',
+    1: '/home/ddboline/Documents/podcasts/NewRustacean',
 }
 
 
@@ -64,12 +65,12 @@ def parse_feed(feed_it, cur_urls, newepid, pod_):
                         not in ('Downloaded', 'Skipped'):
                     yield _pep
             _pep = Episodes()
-            _pep.title = unicode(line.text).encode(errors='replace')
+            _pep.title = text_type(line.text).encode(errors='replace')
             _pep.castid = pod_.castid
             _pep.episodeid = newepid
             newepid += 1
         for key, val in line.items():
-            val = unicode(val)
+            val = text_type(val)
             if not _pep:
                 continue
             if key == 'url':
